@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventTix - Event Ticket Management System</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-icon">🎫</span>
+                <div>
+                    <h1>EventTix</h1>
+                    <p>Ticket Management</p>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-item active" data-section="dashboard">📊 Dashboard</a>
+                <a class="nav-item" data-section="events">🎪 Events</a>
+                <a class="nav-item" data-section="book-ticket">🎟️ Book Ticket</a>
+                <a class="nav-item" data-section="bookings">📋 Bookings</a>
+                <a class="nav-item" data-section="analytics">📈 Analytics</a>
+                <a class="nav-item" data-section="activity">⏱️ Activity & Undo</a>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Made with ❤️ by Vinay</p>
+                <p class="text-muted">v1.0 | DS Project</p>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- Mobile Header with menu toggle -->
+            <div class="mobile-header">
+                <button id="mobile-menu-btn" class="btn-icon">☰</button>
+                <span>EventTix</span>
+            </div>
+
+            <!-- SECTION: DASHBOARD -->
+            <section id="section-dashboard" class="page-section active">
+                <div class="page-header">
+                    <h2>📊 Dashboard</h2>
+                    <p class="text-muted">Overview of your event management system</p>
+                </div>
+                
+                <!-- Stat Cards -->
+                <div class="stat-grid">
+                    <div class="stat-card stat-card--primary">
+                        <div class="stat-icon">🎪</div>
+                        <div class="stat-info">
+                            <h3 id="stat-total-events">0</h3>
+                            <p>Total Events</p>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-card--success">
+                        <div class="stat-icon">🎫</div>
+                        <div class="stat-info">
+                            <h3 id="stat-tickets-sold">0</h3>
+                            <p>Tickets Sold</p>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-card--warning">
+                        <div class="stat-icon">💺</div>
+                        <div class="stat-info">
+                            <h3 id="stat-available-tickets">0</h3>
+                            <p>Available Tickets</p>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-card--info">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3 id="stat-total-revenue">₹0</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Bookings -->
+                <div class="card mt-24">
+                    <div class="card-header">
+                        <h3>🕐 Recent Bookings</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Ticket ID</th><th>Customer</th><th>Event</th><th>Type</th><th>Price</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="dashboard-recent-bookings">
+                                <tr><td colspan="6" class="empty-state">No bookings yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card mt-24">
+                    <div class="card-header">
+                        <h3>⚡ Recent Activity</h3>
+                    </div>
+                    <div id="dashboard-recent-activity" class="activity-list">
+                        <div class="empty-state">No activity yet</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: EVENTS -->
+            <section id="section-events" class="page-section">
+                <div class="page-header">
+                    <h2>🎪 Events</h2>
+                    <p class="text-muted">Manage your events</p>
+                </div>
+                <div class="filter-bar">
+                    <input type="text" id="event-search" placeholder="🔍 Search events..." class="search-input">
+                    <select id="event-category-filter" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <!-- Categories populated by JS -->
+                    </select>
+                    <button id="btn-add-event" class="btn btn-primary">+ Add Event</button>
+                </div>
+                <div id="events-container" class="events-grid">
+                    <div class="empty-state">No events found</div>
+                </div>
+            </section>
+
+            <!-- SECTION: BOOK TICKET -->
+            <section id="section-book-ticket" class="page-section">
+                <div class="page-header">
+                    <h2>🎟️ Book a Ticket</h2>
+                    <p class="text-muted">Follow the steps to book your ticket</p>
+                </div>
+                
+                <!-- Step Indicator -->
+                <div class="booking-steps">
+                    <div class="step active" data-step="1"><span class="step-number">1</span><span class="step-label">Select Event</span></div>
+                    <div class="step-line"></div>
+                    <div class="step" data-step="2"><span class="step-number">2</span><span class="step-label">Ticket Type</span></div>
+                    <div class="step-line"></div>
+                    <div class="step" data-step="3"><span class="step-number">3</span><span class="step-label">Details</span></div>
+                    <div class="step-line"></div>
+                    <div class="step" data-step="4"><span class="step-number">4</span><span class="step-label">Confirm</span></div>
+                </div>
+
+                <!-- Step 1: Select Event -->
+                <div id="step-1" class="step-content active">
+                    <div class="card">
+                        <h3>Select an Event</h3>
+                        <p class="text-muted">Choose the event you want to attend</p>
+                        <div id="booking-event-list" class="booking-event-list">
+                            <!-- Event cards populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Select Ticket Type -->
+                <div id="step-2" class="step-content">
+                    <div class="card">
+                        <h3>Select Ticket Type</h3>
+                        <p class="text-muted">Choose your preferred ticket category</p>
+                        <div id="ticket-type-cards" class="ticket-type-grid">
+                            <!-- Ticket type cards populated by JS -->
+                        </div>
+                        <div class="step-actions">
+                            <button class="btn btn-outline" onclick="App.bookingPrevStep()">← Back</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Customer Details -->
+                <div id="step-3" class="step-content">
+                    <div class="card">
+                        <h3>Enter Your Details</h3>
+                        <p class="text-muted">Fill in your information</p>
+                        <form id="customer-form" onsubmit="return false;">
+                            <div class="form-group">
+                                <label for="input-customer-name">Full Name *</label>
+                                <input type="text" id="input-customer-name" placeholder="Enter your full name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-customer-email">Email Address *</label>
+                                <input type="email" id="input-customer-email" placeholder="your.email@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-customer-phone">Phone Number * (10 digits)</label>
+                                <input type="tel" id="input-customer-phone" placeholder="9876543210" maxlength="10" required>
+                            </div>
+                            <div class="step-actions">
+                                <button class="btn btn-outline" type="button" onclick="App.bookingPrevStep()">← Back</button>
+                                <button class="btn btn-primary" type="button" onclick="App.bookingNextStep()">Next →</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Step 4: Summary & Confirm -->
+                <div id="step-4" class="step-content">
+                    <div class="card">
+                        <h3>Booking Summary</h3>
+                        <p class="text-muted">Review your booking details</p>
+                        <div id="booking-summary-content" class="booking-summary">
+                            <!-- Summary populated by JS -->
+                        </div>
+                        <div class="step-actions">
+                            <button class="btn btn-outline" onclick="App.bookingPrevStep()">← Back</button>
+                            <button id="btn-confirm-booking" class="btn btn-success btn-lg">✅ Confirm Booking</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Success -->
+                <div id="step-success" class="step-content">
+                    <div class="card text-center">
+                        <div class="success-icon">✅</div>
+                        <h2>Booking Confirmed!</h2>
+                        <p class="text-muted">Your ticket has been booked successfully</p>
+                        <div id="success-ticket-id" class="ticket-id-display"></div>
+                        <div class="step-actions">
+                            <button class="btn btn-primary" onclick="App.viewLastTicket()">🎫 View Ticket</button>
+                            <button class="btn btn-outline" onclick="App.resetBooking()">Book Another</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: BOOKINGS -->
+            <section id="section-bookings" class="page-section">
+                <div class="page-header">
+                    <h2>📋 All Bookings</h2>
+                    <p class="text-muted">View and manage all ticket bookings</p>
+                </div>
+                <div class="filter-bar">
+                    <input type="text" id="booking-search" placeholder="🔍 Search by Ticket ID or Name..." class="search-input">
+                    <select id="booking-status-filter" class="filter-select">
+                        <option value="all">All Status</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Ticket ID</th><th>Customer</th><th>Event</th><th>Type</th><th>Price</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="bookings-table-body">
+                                <tr><td colspan="8" class="empty-state">No bookings found</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: TICKET VIEW -->
+            <section id="section-ticket-view" class="page-section">
+                <div class="page-header">
+                    <h2>🎫 Ticket Details</h2>
+                    <p class="text-muted">Your booking confirmation</p>
+                </div>
+                <div id="ticket-card" class="ticket-card-container">
+                    <!-- Ticket rendered by JS -->
+                </div>
+                <div class="text-center mt-24">
+                    <button class="btn btn-outline" onclick="App.navigateTo('bookings')">← Back to Bookings</button>
+                </div>
+            </section>
+
+            <!-- SECTION: ANALYTICS -->
+            <section id="section-analytics" class="page-section">
+                <div class="page-header">
+                    <h2>📈 Analytics</h2>
+                    <p class="text-muted">Event performance and booking statistics</p>
+                </div>
+                <div id="analytics-content">
+                    <!-- Analytics rendered by JS -->
+                </div>
+            </section>
+
+            <!-- SECTION: ACTIVITY & UNDO -->
+            <section id="section-activity" class="page-section">
+                <div class="page-header">
+                    <div>
+                        <h2>⏱️ Activity Log & Undo</h2>
+                        <p class="text-muted">Recent actions and undo operations (Stack Data Structure)</p>
+                    </div>
+                    <button id="btn-undo" class="btn btn-danger" disabled>↩️ Undo Last Action</button>
+                </div>
+
+                <!-- Stack Visualization -->
+                <div class="card mt-24">
+                    <div class="card-header">
+                        <h3>📚 Action Stack Visualization</h3>
+                        <span class="badge badge-info" id="stack-size-badge">Size: 0</span>
+                    </div>
+                    <p class="text-muted" style="padding:0 20px">DATA STRUCTURE: STACK (LIFO - Last In, First Out). The most recent action is at the TOP.</p>
+                    <div id="activity-stack-visual" class="stack-visual">
+                        <div class="empty-state">Stack is empty</div>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="card mt-24">
+                    <div class="card-header">
+                        <h3>📝 Full Activity Log</h3>
+                    </div>
+                    <div id="activity-list" class="activity-list">
+                        <div class="empty-state">No activity recorded</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- EVENT MODAL -->
+    <div id="modal-event" class="modal-overlay" style="display:none">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-event-title">Add New Event</h3>
+                <button class="modal-close" onclick="App.closeEventModal()">✕</button>
+            </div>
+            <form id="form-event" onsubmit="return false;">
+                <div class="modal-body">
+                    <input type="hidden" id="input-event-id" value="">
+                    <div class="form-group">
+                        <label for="input-event-name">Event Name *</label>
+                        <input type="text" id="input-event-name" placeholder="Enter event name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-event-description">Description</label>
+                        <textarea id="input-event-description" placeholder="Enter event description" rows="3"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="input-event-category">Category *</label>
+                            <select id="input-event-category" required>
+                                <option value="">Select category</option>
+                                <!-- Populated by JS from CATEGORIES array -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-event-venue">Venue *</label>
+                            <input type="text" id="input-event-venue" placeholder="Enter venue" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="input-event-date">Date *</label>
+                            <input type="date" id="input-event-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-event-time">Time *</label>
+                            <input type="time" id="input-event-time" required>
+                        </div>
+                    </div>
+                    <h4 style="margin-top:16px; margin-bottom:8px">🎫 Ticket Configuration</h4>
+                    <div class="ticket-config">
+                        <div class="ticket-config-row">
+                            <span class="ticket-type-label">VIP</span>
+                            <div class="form-group">
+                                <label>Price (₹)</label>
+                                <input type="number" id="input-vip-price" min="0" value="0" placeholder="Price">
+                            </div>
+                            <div class="form-group">
+                                <label>Capacity</label>
+                                <input type="number" id="input-vip-capacity" min="0" value="0" placeholder="Seats">
+                            </div>
+                        </div>
+                        <div class="ticket-config-row">
+                            <span class="ticket-type-label">Premium</span>
+                            <div class="form-group">
+                                <label>Price (₹)</label>
+                                <input type="number" id="input-premium-price" min="0" value="0" placeholder="Price">
+                            </div>
+                            <div class="form-group">
+                                <label>Capacity</label>
+                                <input type="number" id="input-premium-capacity" min="0" value="0" placeholder="Seats">
+                            </div>
+                        </div>
+                        <div class="ticket-config-row">
+                            <span class="ticket-type-label">General</span>
+                            <div class="form-group">
+                                <label>Price (₹)</label>
+                                <input type="number" id="input-general-price" min="0" value="0" placeholder="Price">
+                            </div>
+                            <div class="form-group">
+                                <label>Capacity</label>
+                                <input type="number" id="input-general-capacity" min="0" value="0" placeholder="Seats">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="App.closeEventModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-event">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CONFIRM MODAL -->
+    <div id="modal-confirm" class="modal-overlay" style="display:none">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>⚠️ Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message">Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-confirm-no" class="btn btn-outline">Cancel</button>
+                <button id="btn-confirm-yes" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notification-container"></div>
+
+    <!-- SCRIPTS (load order matters!) -->
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/utils/storage.js"></script>
+    <script src="js/data-structures/linked-list.js"></script>
+    <script src="js/data-structures/stack.js"></script>
+    <script src="js/data-structures/array-store.js"></script>
+    <script src="js/modules/validator.js"></script>
+    <script src="js/modules/event-manager.js"></script>
+    <script src="js/modules/ticket-manager.js"></script>
+    <script src="js/modules/dashboard.js"></script>
+    <script src="js/modules/analytics.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

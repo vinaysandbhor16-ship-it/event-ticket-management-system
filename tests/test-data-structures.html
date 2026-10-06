@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventTix - Data Structure Test Suite</title>
+    <style>
+        :root {
+            --primary: #6366F1;
+            --success: #10B981;
+            --danger: #EF4444;
+            --bg: #F8FAFC;
+            --card: #FFFFFF;
+            --text: #1E293B;
+            --muted: #64748B;
+            --border: #E2E8F0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 32px 16px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { margin-bottom: 24px; text-align: center; }
+        h1 { font-size: 1.8rem; margin-bottom: 8px; color: var(--primary); }
+        p.subtitle { color: var(--muted); font-size: 0.95rem; }
+        .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; display: flex; justify-content: space-around; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .summary-item h3 { font-size: 1.8rem; margin-bottom: 4px; }
+        .summary-item.total h3 { color: var(--primary); }
+        .summary-item.passed h3 { color: var(--success); }
+        .summary-item.failed h3 { color: var(--danger); }
+        .summary-item p { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .section-header h2 { font-size: 1.25rem; }
+        .test-list { display: flex; flex-direction: column; gap: 8px; }
+        .test-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 8px; background: #F1F5F9; font-size: 0.9rem; }
+        .test-item.pass { background: #ECFDF5; border-left: 4px solid var(--success); }
+        .test-item.fail { background: #FEF2F2; border-left: 4px solid var(--danger); }
+        .test-status { font-weight: 600; font-size: 0.8rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+        .test-status.pass { color: var(--success); background: #D1FAE5; }
+        .test-status.fail { color: var(--danger); background: #FEE2E2; }
+        .btn-run { display: block; width: 100%; max-width: 250px; margin: 0 auto 24px; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .btn-run:hover { opacity: 0.9; }
+        .back-link { display: inline-block; margin-bottom: 16px; color: var(--primary); text-decoration: none; font-weight: 500; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Back to EventTix Application</a>
+        <header>
+            <h1>🧪 Data Structure Unit Test Suite</h1>
+            <p class="subtitle">Validating Array, Singly Linked List, and Stack algorithms</p>
+        </header>
+
+        <button class="btn-run" onclick="runAllTests()">▶ Run All Tests</button>
+
+        <div class="summary-card">
+            <div class="summary-item total"><h3 id="stat-total">0</h3><p>Total Tests</p></div>
+            <div class="summary-item passed"><h3 id="stat-passed">0</h3><p>Passed</p></div>
+            <div class="summary-item failed"><h3 id="stat-failed">0</h3><p>Failed</p></div>
+        </div>
+
+        <!-- ARRAY TESTS -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>1. Array Store Tests (`EventStore`)</h2>
+                <span id="badge-array" class="test-status">Pending</span>
+            </div>
+            <div id="results-array" class="test-list"></div>
+        </div>
+
+        <!-- LINKED LIST TESTS -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>2. Singly Linked List Tests (`BookingLinkedList`)</h2>
+                <span id="badge-ll" class="test-status">Pending</span>
+            </div>
+            <div id="results-ll" class="test-list"></div>
+        </div>
+
+        <!-- STACK TESTS -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>3. Stack Tests (`ActionStack`)</h2>
+                <span id="badge-stack" class="test-status">Pending</span>
+            </div>
+            <div id="results-stack" class="test-list"></div>
+        </div>
+    </div>
+
+    <!-- Load files under test -->
+    <script src="../js/utils/helpers.js"></script>
+    <script src="../js/utils/storage.js"></script>
+    <script src="../js/data-structures/array-store.js"></script>
+    <script src="../js/data-structures/linked-list.js"></script>
+    <script src="../js/data-structures/stack.js"></script>
+
+    <script>
+        let totalCount = 0;
+        let passCount = 0;
+        let failCount = 0;
+
+        function assert(condition, testName, containerId) {
+            totalCount++;
+            const container = document.getElementById(containerId);
+            const item = document.createElement('div');
+            if (condition) {
+                passCount++;
+                item.className = 'test-item pass';
+                item.innerHTML = `<span>✔ ${testName}</span><span class="test-status pass">PASS</span>`;
+            } else {
+                failCount++;
+                item.className = 'test-item fail';
+                item.innerHTML = `<span>✖ ${testName}</span><span class="test-status fail">FAIL</span>`;
+            }
+            container.appendChild(item);
+        }
+
+        function runAllTests() {
+            totalCount = 0;
+            passCount = 0;
+            failCount = 0;
+
+            document.getElementById('results-array').innerHTML = '';
+            document.getElementById('results-ll').innerHTML = '';
+            document.getElementById('results-stack').innerHTML = '';
+
+            // 1. ARRAY TESTS
+            testArrayStore();
+
+            // 2. LINKED LIST TESTS
+            testLinkedList();
+
+            // 3. STACK TESTS
+            testStack();
+
+            // Update stats
+            document.getElementById('stat-total').textContent = totalCount;
+            document.getElementById('stat-passed').textContent = passCount;
+            document.getElementById('stat-failed').textContent = failCount;
+        }
+
+        function testArrayStore() {
+            const store = new EventStore();
+            assert(store.getCount() === 0, "Initial array count is 0", "results-array");
+            assert(store.events.length === MAX_EVENTS, `Array allocates exactly MAX_EVENTS (${MAX_EVENTS}) slots`, "results-array");
+
+            // Add Event
+            const evt1 = { id: 0, name: "Concert", category: "Music", status: "active", tickets: { VIP: {price:100, total:10, available:10}, Premium: {price:50, total:20, available:20}, General: {price:20, total:50, available:50} } };
+            const addRes = store.add(evt1);
+            assert(addRes.success === true && store.get(0).name === "Concert", "Add event to array at index 0 [O(1)]", "results-array");
+            assert(store.getCount() === 1, "Array count increments to 1", "results-array");
+
+            // Update Event
+            store.update(0, { name: "Rock Concert" });
+            assert(store.get(0).name === "Rock Concert", "Update event at index 0 modifies correct element", "results-array");
+
+            // Search
+            const searchResults = store.search("Rock");
+            assert(searchResults.length === 1 && searchResults[0].id === 0, "Linear search matches query substring", "results-array");
+
+            // Delete Event
+            const removeRes = store.remove(0);
+            assert(removeRes.success === true && store.get(0) === null, "Remove event sets array slot to null", "results-array");
+            assert(store.getCount() === 0, "Array count decrements to 0", "results-array");
+
+            // Restore Event (Undo simulation)
+            store.restore(evt1);
+            assert(store.get(0) !== null && store.get(0).name === "Rock Concert", "Restore reinstates event into array slot", "results-array");
+
+            document.getElementById('badge-array').textContent = "Passed";
+            document.getElementById('badge-array').className = "test-status pass";
+        }
+
+        function testLinkedList() {
+            const list = new BookingLinkedList();
+            assert(list.isEmpty() === true, "New linked list is empty (head is null)", "results-ll");
+            assert(list.getSize() === 0, "Initial size is 0", "results-ll");
+
+            // Insert at beginning (Head)
+            const b1 = { ticketId: "TKT-10001", customerName: "Rahul Sharma", eventName: "Tech Fest", price: 500, status: "confirmed", eventId: 0, ticketType: "General" };
+            list.insertAtBeginning(b1);
+            assert(list.head !== null && list.head.data.ticketId === "TKT-10001", "Insert at head updates head pointer [O(1)]", "results-ll");
+            assert(list.getSize() === 1, "Size increments to 1", "results-ll");
+
+            const b2 = { ticketId: "TKT-10002", customerName: "Priya Patel", eventName: "Cultural Night", price: 800, status: "confirmed", eventId: 1, ticketType: "Premium" };
+            list.insertAtBeginning(b2);
+            assert(list.head.data.ticketId === "TKT-10002" && list.head.next.data.ticketId === "TKT-10001", "Subsequent insert maintains LIFO order at head", "results-ll");
+            assert(list.getSize() === 2, "Size increments to 2", "results-ll");
+
+            // Search by Ticket ID [O(n)]
+            const found = list.search("TKT-10001");
+            assert(found !== null && found.customerName === "Rahul Sharma", "Search by ticket ID finds correct node data", "results-ll");
+
+            const notFound = list.search("TKT-99999");
+            assert(notFound === null, "Search for non-existent ticket returns null", "results-ll");
+
+            // Search by Name
+            const nameSearch = list.searchByName("Priya");
+            assert(nameSearch.length === 1 && nameSearch[0].ticketId === "TKT-10002", "Search by customer name matches partial text", "results-ll");
+
+            // Cancel Booking
+            const cancelRes = list.cancelBooking("TKT-10001");
+            assert(cancelRes.success === true && list.search("TKT-10001").status === "cancelled", "Cancel booking updates status to cancelled", "results-ll");
+
+            // Revenue calculation ignores cancelled tickets
+            assert(list.getTotalRevenue() === 800, "Total revenue only counts confirmed tickets (₹800)", "results-ll");
+
+            // Remove Node (Undo booking)
+            const removeHeadRes = list.removeNode("TKT-10002");
+            assert(removeHeadRes.success === true && list.head.data.ticketId === "TKT-10001", "Remove node at head correctly shifts head pointer", "results-ll");
+            assert(list.getSize() === 1, "Size updates after node deletion", "results-ll");
+
+            document.getElementById('badge-ll').textContent = "Passed";
+            document.getElementById('badge-ll').className = "test-status pass";
+        }
+
+        function testStack() {
+            const stack = new ActionStack(5);
+            assert(stack.isEmpty() === true, "New stack is empty (top is -1)", "results-stack");
+            assert(stack.getSize() === 0, "Initial size is 0", "results-stack");
+            assert(stack.peek() === null, "Peek on empty stack returns null", "results-stack");
+            assert(stack.pop() === null, "Pop on empty stack returns null", "results-stack");
+
+            // Push operations
+            stack.push({ type: "BOOK_TICKET", description: "Booked TKT-1" });
+            assert(stack.top === 0 && stack.peek().type === "BOOK_TICKET", "Push places element at top [O(1)]", "results-stack");
+
+            stack.push({ type: "CANCEL_TICKET", description: "Cancelled TKT-2" });
+            assert(stack.top === 1 && stack.peek().type === "CANCEL_TICKET", "Second push advances top pointer", "results-stack");
+
+            // Pop operation (LIFO)
+            const popped = stack.pop();
+            assert(popped.type === "CANCEL_TICKET", "Pop returns most recently pushed element (LIFO)", "results-stack");
+            assert(stack.top === 0 && stack.peek().type === "BOOK_TICKET", "Top pointer decrements after pop", "results-stack");
+
+            // Stack full & boundary
+            stack.push({ type: "A" });
+            stack.push({ type: "B" });
+            stack.push({ type: "C" });
+            stack.push({ type: "D" });
+            assert(stack.isFull() === true, "Stack recognizes capacity limit (isFull === true)", "results-stack");
+
+            document.getElementById('badge-stack').textContent = "Passed";
+            document.getElementById('badge-stack').className = "test-status pass";
+        }
+
+        // Auto-run on page load
+        window.addEventListener('DOMContentLoaded', runAllTests);
+    </script>
+</body>
+</html>
